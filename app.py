@@ -68,6 +68,7 @@ def phone_cleanup(df):
                 pass
 phone_cleanup(cust_demo)
 
+df['credit_card_id'] = pd.factorize(df['credit_card_number'])[0]
 
 
 
