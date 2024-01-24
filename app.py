@@ -131,15 +131,13 @@ print(f"There are {count1 - email_null_count} *NON NULL* emails that aren't vali
 
 
 
-
+df['credit_card_id'] = pd.factorize(df['credit_card_number'])[0]
 
 
 orders_f = df[['order_id', 'customer_id', 'items', 'aperitifs', 'appetizers', 'entrees', 'desserts', 'total']]
-CC_df_f = df[["credit_card_expires", "credit_card_number", "credit_card_provider", "credit_card_security_code"]]
-cust_info_f = df[["name", "phone_number", "address", "city", "state", "zip_code"]]
+CC_df_f = df[["credit_card_id","credit_card_expires", "credit_card_number", "credit_card_provider", "credit_card_security_code"]]
+cust_info_f = df[["customer_id","name", "phone_number", "credit_card_id", "address", "city", "state", "zip_code"]]
 cust_stats_f = df[["customer_id", "total_orders", "total_items", "total_spent"]]
-
-
 
 
 
@@ -148,19 +146,3 @@ orders_f.to_sql('orders', con=engine, index=False, if_exists='replace')
 CC_df_f.to_sql('credit_cards', con=engine, index=False, if_exists='replace')
 cust_info_f.to_sql('customer_info', con=engine, index=False, if_exists='replace')
 cust_stats_f.to_sql('customer_stats', con=engine, index=False, if_exists='replace')
-
-# SQLite database connection string
-engine = create_engine('sqlite:///PEP1_db.db')
-# Query the data from the database into a DataFrame
-table_name = 'orders'
-query = f'SELECT * FROM {table_name}'
-orders_df = pd.read_sql(query, con=engine)
-table_name = 'credit_cards'
-query = f'SELECT * FROM {table_name}'
-CC_df = pd.read_sql(query, con=engine)
-table_name = 'customer_info'
-query = f'SELECT * FROM {table_name}'
-cust_info = pd.read_sql(query, con=engine)
-table_name = 'customer_stats'
-query = f'SELECT * FROM {table_name}'
-cust_stats = pd.read_sql(query, con=engine)
