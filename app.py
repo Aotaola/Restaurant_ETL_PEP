@@ -28,20 +28,21 @@ for customer_id, details in yaml_data.items():
 
 # Convert the list of dictionaries to Pandas DataFrame
 cust_demo = pd.DataFrame(data_list)
-customer_data = cust_demo.drop_duplicates()
+customer_data_df = cust_demo.drop_duplicates()
 
 cust_stat = pd.read_csv('data_files/customer_statistics.csv')
-customer_stats = cust_stat.drop_duplicates()
+customer_stats_df = cust_stat.drop_duplicates()
 
 orders = pd.read_csv('data_files/orders (1).csv')
-new_orders = orders.drop_duplicates()
-
+orders_df = orders.drop_duplicates()
+#change merges here
 merged_data = cust_demo.merge(cust_stat, left_index=True, right_index=True)
 merged_data.drop_duplicates(inplace=True)
+#!!!
 
 merged_data['credit_card_number'] = pd.to_numeric(merged_data['credit_card_number'], errors='coerce')
+#merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
+
 merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
 
-merged_data_cleaned['credit_card_number'] = merged_data_cleaned['credit_card_number'].astype(str).str.extract('(\d{15,19})')
-
-merged_data_cleaned = merged_data_cleaned.dropna(subset=['credit_card_number'])
+merged_data_cleaned['credit_card_number'] = merged_data['credit_card_number'].astype(str).str.extract('(\d{15,19})')
