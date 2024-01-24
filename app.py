@@ -59,9 +59,9 @@ def phone_cleanup(df):
             elif len(number) == 11:
                 df.phone_number[i] = f'+{number[0]} ({number[1:4]}) {number[4:7]}-{number[7:11]}'
             elif len(number) == 12:
-                df.phone_number[i] = f'+{number[0:1]} ({number[2:5]}) {number[5:8]}-{number[8:12]}'
+                df.phone_number[i] = f'+{number[0:2]} ({number[2:5]}) {number[5:8]}-{number[8:12]}'
             elif len(number) == 13:
-                df.phone_number[i] = f'+{number[0:2]} ({number[3:6]}) {number[6:9]}-{number[9:13]}'
+                df.phone_number[i] = f'+{number[0:3]} ({number[3:6]}) {number[6:9]}-{number[9:13]}'
             if str(extensions[i]).isdigit and extensions[i] != '':
                 df.phone_number[i] = df.phone_number[i] + f' x {extensions[i]}'
             else:
