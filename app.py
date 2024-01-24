@@ -2,6 +2,8 @@ import yaml
 import pandas as pd
 import numpy as np
 import sqlite3
+from sqlalchemy import create_engine
+
 # here we can add all the data cleaning methods to have one file cleaning and merging data
 customer_demo = 'data_files/customer_demographics.yaml'
 # Load YAML data from a file
@@ -51,11 +53,9 @@ merged_data = pd.merge(cust_demo, cust_stat, how='left', on='customer_id')
 merged_data = pd.merge(merged_data, orders, how='left', on="customer_id")
 merged_data.drop_duplicates(inplace=True)
 
-
+#cleaning credit card numbers update
 df = merged_data.dropna(subset=['credit_card_number'])
-
 df['credit_card_number'] = df['credit_card_number'].astype(str).str.extract('(\d{15,19})')
-
 df = df.dropna(subset=['credit_card_number'])
 
 #Checking for NULL values in the customer stats dataframe
@@ -69,12 +69,9 @@ pd.isnull(orders).sum()
 null_count_demo = pd.isnull(cust_demo).sum()
 null_count_demo
 
-#cleaning credit card numbers update
 
-merged_data['credit_card_number'] = pd.to_numeric(merged_data['credit_card_number'], errors='coerce')
-#merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
-merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
-merged_data_cleaned['credit_card_number'] = merged_data['credit_card_number'].astype(str).str.extract('(\d{15,19})')
+
+
 
 #checking for any outlier in the items column. Item count of ZERO should be considered in error.
 #RESULT: No items found less than ONE.
@@ -131,3 +128,36 @@ def phone_cleanup(df):
             else:
                 pass
 phone_cleanup(df)
+
+
+
+orders_f = df[['order_id', 'customer_id', 'items', 'aperitifs', 'appetizers', 'entrees', 'desserts', 'total']]
+CC_df_f = df[["credit_card_expires", "credit_card_number", "credit_card_provider", "credit_card_security_code"]]
+cust_info_f = df[["name", "phone_number", "address", "city", "state", "zip_code"]]
+cust_stats_f = df[["customer_id", "total_orders", "total_items", "total_spent"]]
+
+
+
+
+
+engine = create_engine('sqlite:///PEP1_db.db')
+orders_f.to_sql('orders', con=engine, index=False, if_exists='replace')
+CC_df_f.to_sql('credit_cards', con=engine, index=False, if_exists='replace')
+cust_info_f.to_sql('customer_info', con=engine, index=False, if_exists='replace')
+cust_stats_f.to_sql('customer_stats', con=engine, index=False, if_exists='replace')
+
+# SQLite database connection string
+engine = create_engine('sqlite:///PEP1_db.db')
+# Query the data from the database into a DataFrame
+table_name = 'orders'
+query = f'SELECT * FROM {table_name}'
+orders_df = pd.read_sql(query, con=engine)
+table_name = 'credit_cards'
+query = f'SELECT * FROM {table_name}'
+CC_df = pd.read_sql(query, con=engine)
+table_name = 'customer_info'
+query = f'SELECT * FROM {table_name}'
+cust_info = pd.read_sql(query, con=engine)
+table_name = 'customer_stats'
+query = f'SELECT * FROM {table_name}'
+cust_stats = pd.read_sql(query, con=engine)
