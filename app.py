@@ -28,23 +28,86 @@ for customer_id, details in yaml_data.items():
 
 # Convert the list of dictionaries to Pandas DataFrame
 cust_demo = pd.DataFrame(data_list)
-customer_data = cust_demo.drop_duplicates()
+cust_demo = cust_demo.drop_duplicates()
+
+cust_demo.loc[cust_demo['credit_card_provider'] == 'VISA 13 digit', 'credit_card_provider'] = 'VISA 16 digit'
+
+cust_demo.reset_index(inplace = True, drop=True)
+cust_demo = cust_demo.drop('customer_id', axis=1)
+cust_demo.index.name = 'customer_id'
+cust_demo.loc[(cust_demo['credit_card_number'].astype(str).str.len() > 16) | (cust_demo['credit_card_number'].astype(str).str.len() < 15), 'credit_card_number'] = None
 
 cust_stat = pd.read_csv('data_files/customer_statistics.csv')
-customer_stats = cust_stat.drop_duplicates()
+cust_stat = cust_stat.drop_duplicates()
+
 
 orders = pd.read_csv('data_files/orders (1).csv')
-new_orders = orders.drop_duplicates()
+orders = orders.drop_duplicates()
 
-merged_data = cust_demo.merge(cust_stat, left_index=True, right_index=True)
+
+
+
+merged_data = pd.merge(cust_demo, cust_stat, how='left', on='customer_id')
+merged_data = pd.merge(merged_data, orders, how='left', on="customer_id")
 merged_data.drop_duplicates(inplace=True)
 
+
+df = merged_data.dropna(subset=['credit_card_number'])
+
+df['credit_card_number'] = df['credit_card_number'].astype(str).str.extract('(\d{15,19})')
+
+df = df.dropna(subset=['credit_card_number'])
+
+#Checking for NULL values in the customer stats dataframe
+#RESULT: No NULLS were found
+pd.isnull(cust_stat).sum()
+#Checking for NULL values in the orders dataframe
+#RESULT: NONE were found.
+pd.isnull(orders).sum()
+#Checking for NULL values in the customer demographics dataframe
+#RESULT: Found multiple NULLS for address, credit card, email, and phone
+null_count_demo = pd.isnull(cust_demo).sum()
+null_count_demo
+
+#cleaning credit card numbers update
+
 merged_data['credit_card_number'] = pd.to_numeric(merged_data['credit_card_number'], errors='coerce')
+#merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
 merged_data_cleaned = merged_data.dropna(subset=['credit_card_number'])
+merged_data_cleaned['credit_card_number'] = merged_data['credit_card_number'].astype(str).str.extract('(\d{15,19})')
 
-merged_data_cleaned['credit_card_number'] = merged_data_cleaned['credit_card_number'].astype(str).str.extract('(\d{15,19})')
+#checking for any outlier in the items column. Item count of ZERO should be considered in error.
+#RESULT: No items found less than ONE.
+rslt_df = orders.sort_values(by = 'items')
+rslt_df.head()
 
-merged_data_cleaned = merged_data_cleaned.dropna(subset=['credit_card_number'])
+#checking for outlier of amounts considered too great for item count.
+#RESULT: No items found greater than TEN.
+rslt_df.iloc[-5:]
+
+#checking for total values that don't fit the expectation of the data
+#RESULT: No totals found less than $100, which is in tolerance
+rslt_df = orders.sort_values(by = 'total')
+rslt_df.head()
+
+#checking for outlier totals that would exceed expected amount
+#RESULT: No totals found greater than $1000, which is in tolerance
+rslt_df.iloc[-5:]
+
+#cheking the number of invalid email entries against NULL values
+#RESULT: All emails that are entered are in proper format
+cust_email = cust_demo_df["email"].str.match(r"^.+@.+\..{2,}$")
+count1=0
+count=0
+for i in cust_email:
+    if i == True:
+        count +=1
+    else:
+        count1 +=1
+email_null_count = pd.isnull(cust_demo_df['email']).sum()
+print(f'There are {count} emails that are valid')
+print(f"There are {email_null_count} emails with NULL values")
+print(f"There are {count1 - email_null_count} *NON NULL* emails that aren't valid")
 
 
 def phone_cleanup(df):
