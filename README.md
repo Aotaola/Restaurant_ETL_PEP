@@ -1,2 +1,3 @@
 # Restaurant_ETL_PEP
-ADD ANY RELEVANT INFO HERE
+
+The program file should be run on python kernel 3.12
