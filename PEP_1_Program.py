@@ -69,8 +69,8 @@ cust_demo.loc[(cust_demo['credit_card_number'].astype(str).str.len() > 16) | (cu
 def phone_cleanup(df):
     extensions = df['phone_number'].str.extract(r'x(.+)', expand=False)
     extensions = extensions.fillna('')
-    df['phone_number'] = df['phone_number'].str.replace(r'x(.+)', '')
-    df['phone_number'] = df['phone_number'].str.replace(r'\D', '')
+    df['phone_number'] = df['phone_number'].str.replace(r'x(.+)', '', regex = True)
+    df['phone_number'] = df['phone_number'].str.replace(r'\D', '', regex = True)
     for i in range(len(df.phone_number)):
         if isinstance(df.phone_number[i], str) and df.phone_number[i] is not None:
             number = ''.join(filter(str.isdigit, df.phone_number[i]))
