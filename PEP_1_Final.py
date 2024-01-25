@@ -187,6 +187,9 @@ merged_data.drop_duplicates(inplace=True)
 CC_df_f = cust_demo[['credit_card_expires', 'credit_card_number', 'credit_card_provider', 'credit_card_security_code']].copy()
 cust_demo = cust_demo.drop(['credit_card_expires', 'credit_card_number', 'credit_card_provider', 'credit_card_security_code'], axis=1)
 
+#REARRANGE cutomer table columns
+cust_demo = cust_demo[[ 'name', 'address', 'city', 'state', 'phone_number', 'email']]
+
 #ASSIGN dataframe data to variables
 orders_f = merged_data[['order_id', 'customer_id', 'items', 'aperitifs', 'appetizers', 'entrees', 'desserts', 'total']]
 CC_df_f = merged_data[["customer_id","credit_card_expires", "credit_card_number", "credit_card_provider", "credit_card_security_code"]]
@@ -265,34 +268,34 @@ while user_in.lower() == 'y':
 
             statement = f"INSERT into customer_info VALUES ('{user_id}', '{name}', '{phone}', '{address}', '{city}', '{state}', '{zip_code}')"
            
-            print(f"\n Would you like to SAVE: \n {name} {phone} {address} {city} {state} {zip_code} ?\n")
+            print(f"\n Would you like to SAVE: \n {user_id} {name} {phone} {address} {city} {state} {zip_code} ?\n")
             user_in = input("Press Y to SAVE, or any other button to return to main screen: ")
 
             if user_in.lower() == 'y':
                 conn.execute(statement)
                 conn.commit()
-                print('SUCCESS! CUSTOMER HAS BEEN ADDED!\n')
+                print('\nSUCCESS! CUSTOMER HAS BEEN ADDED!\n')
             else:
-                break
+                print('\nUSER NOT SAVED!\n')
 
         #DELETE CUSTOMER
         case '5':
             user_in = input('Enter Customer Number: ')
-            conn.row_factory = sl.Row
+            conn.row_factory = sqlalchemy.Row
             rows = conn.execute(f'SELECT DISTINCT * FROM customer_info WHERE customer_id = {user_in}')
 
             for row in rows:
                 print(f'\n {dict(row)} \n')
 
             print("DELETE this entry?")
-            user_in2 = input("Press Y to DELETE, or any other button to return: ")
+            user_in2 = input("\nPress Y to DELETE, or any other button to return: ")
 
             if user_in2.lower() == 'y':
                 conn.execute(f'DELETE FROM customer_info WHERE customer_id = {user_in}')
                 conn.commit()
                 print("\nSUCCESSFULLY DELETE!\n")
             else:
-                break
+                print("\nUSER NOT deleted!")
             
     user_in = input('Would you like to make another search? Y or any other button to quit: ')
 
