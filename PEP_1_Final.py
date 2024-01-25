@@ -187,6 +187,9 @@ merged_data.drop_duplicates(inplace=True)
 CC_df_f = cust_demo[['credit_card_expires', 'credit_card_number', 'credit_card_provider', 'credit_card_security_code']].copy()
 cust_demo = cust_demo.drop(['credit_card_expires', 'credit_card_number', 'credit_card_provider', 'credit_card_security_code'], axis=1)
 
+#REARRANGE customer demo table columns
+cust_demo = cust_demo[[ 'name', 'address', 'city', 'state', 'phone_number', 'email']]
+
 #ASSIGN dataframe data to variables
 orders_f = merged_data[['order_id', 'customer_id', 'items', 'aperitifs', 'appetizers', 'entrees', 'desserts', 'total']]
 CC_df_f = merged_data[["customer_id","credit_card_expires", "credit_card_number", "credit_card_provider", "credit_card_security_code"]]
